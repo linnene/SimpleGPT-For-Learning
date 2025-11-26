@@ -4,18 +4,19 @@ from torch.nn import functional as F
 from model import GPTLanguageModel
 import os
 import urllib.request
+from tqdm import tqdm
 
 # --- 超参数设置 ---
 batch_size = 32 # 多少个独立的序列并行处理?
 block_size = 64 # 上下文的最大长度是多少?
-max_iters = 5000 # 训练迭代次数
+max_iters = 10000 # 训练迭代次数
 eval_interval = 200
 learning_rate = 3e-4
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 eval_iters = 200
-n_embd = 128 # 嵌入维度
-n_head = 4 # 注意力头的数量
-n_layer = 2 # Transformer 层的数量
+n_embd = 256 # 嵌入维度
+n_head = 6 # 注意力头的数量
+n_layer = 4 # Transformer 层的数量
 dropout = 0.2
 # ------------------
 
@@ -96,12 +97,13 @@ optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
 # --- 训练循环 ---
 print("Starting training...")
-for iter in range(max_iters):
+pbar = tqdm(range(max_iters), desc="Training")
+for iter in pbar:
 
     # 每隔一段时间评估一次损失
     if iter % eval_interval == 0 or iter == max_iters - 1:
         losses = estimate_loss()
-        print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+        pbar.set_postfix({'train_loss': f"{losses['train']:.4f}", 'val_loss': f"{losses['val']:.4f}"})
 
     # 采样一批数据
     xb, yb = get_batch('train')

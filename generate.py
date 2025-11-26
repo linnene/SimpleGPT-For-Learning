@@ -6,7 +6,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f"Using device: {device}")
 
 # --- 加载模型 ---
-if not os.path.exists('gpt_model.pth'):
+if not os.path.exists('./gpt_model.pth'):
     print("Error: gpt_model.pth not found. Please run train.py first.")
     exit()
 
