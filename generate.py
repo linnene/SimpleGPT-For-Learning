@@ -1,6 +1,7 @@
 import torch
 from model import GPTLanguageModel
 import os
+import re
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f"Using device: {device}")
@@ -25,8 +26,11 @@ model.load_state_dict(checkpoint['model_state_dict'])
 model = model.to(device)
 model.eval()
 
-encode = lambda s: [stoi[c] for c in s]
-decode = lambda l: ''.join([itos[i] for i in l])
+def tokenize(text):
+    return re.findall(r"[\w']+|[.,!?;]|\n", text)
+
+encode = lambda s: [stoi.get(c, stoi.get('\n')) for c in tokenize(s)] # 使用 get 处理未知词，默认映射到换行符或其他
+decode = lambda l: ' '.join([itos[i] for i in l]).replace(' \n ', '\n').replace(' .', '.').replace(' ,', ',')
 
 # --- 交互式生成 ---
 print("\nModel loaded successfully!")
